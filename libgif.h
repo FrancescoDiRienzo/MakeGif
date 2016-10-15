@@ -17,3 +17,6 @@
   exit(-1); \
 }
 
+void read_image(MagickWand** ,char*, MagickWand** ,char* );
+
+void resize_image(MagickWand*, int , int );
