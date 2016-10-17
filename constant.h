@@ -3,8 +3,8 @@
 #define ERROR_BACKGROUND_FILE		0
 #define ERROR_INPUT_FILE			1
 #define ERROR_OUTPUT_FILE			2	
-#define ERROR_PARAMITERS			3
-#define ERROR_MULTIPLE_PARAMITERS	4
+#define ERROR_PARAMETERS			3
+#define ERROR_MULTIPLE_PARAMETERS	4
 //
 
 //constant for type of animation
