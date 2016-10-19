@@ -6,7 +6,7 @@ LDFLAGS =
 CFLAGS += `pkg-config --cflags MagickWand`
 LDFLAGS += `pkg-config --libs MagickWand`
 
-makeGif: makeGif.o libgif.o
+makeGif: makeGif.o libgif.o 
 	$(CC) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 makeGif.o: libgif.h constant.h
