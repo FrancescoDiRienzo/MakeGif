@@ -14,3 +14,8 @@
 #define COS 		4
 #define DIAGONAL	5
 //	
+
+//parameters to make the gif
+#define LOOPS   50
+#define DELAY 	15
+#define SIZE_FACTOR 5
