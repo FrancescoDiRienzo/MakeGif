@@ -1,106 +1,150 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <getopt.h>
 #include <MagickWand/MagickWand.h>
-#include "libgif.h"
 #include "constant.h"
+#include "libgif.h"
 
-void  make_gif(MagickWand* background, MagickWand* image,char* name_output, int type , int delay){
-  int i;
-  MagickWand* clone=NewMagickWand();
-  MagickWand* result=NewMagickWand();
-  MagickBooleanType status;
-  size_t height_background;
-  size_t width_background;
-  size_t height_image;
-  size_t width_image;
-  size_t x;
-  size_t y;
+//It contains the informations obtained using la getopt() 
+typedef struct datainput{
+  int option;
+  int type_animation;
+  char* background_file;
+  char* input_file;
+  char* output_file;
+} data_input;
+//Initialization of the structure
+void datainput_init(data_input* d){
+  d->option=0;
+  d->type_animation=0;
+  d->background_file=NULL;
+  d->input_file=NULL;
+  d->output_file=NULL;
+}
 
-  height_background=MagickGetImageHeight(background);
-  printf("height--> %d \n",height_background);
+// function for the print of error
+void print_error(int type) {
+	printf("\nError:\n");
+    switch (type)
+	{
+		case ERROR_BACKGROUND_FILE :		
+			printf("miss -b option\n");
+		  break;
+		case ERROR_INPUT_FILE :		
+			printf("miss -i option\n");
+		  break;
+		case ERROR_OUTPUT_FILE :	
+			printf("miss -o option\n");
+		  break;
+		case ERROR_PARAMETERS :	
+			printf("Choose the type of animation with the following options:\n");
+			printf("\tlineal:  -l\n\tcircle:  -c\n\tsin:     -s\n\tcos:     -z\n\tdiagonal:-d\n");
+		  break;
+		case ERROR_MULTIPLE_PARAMETERS :	
+			printf("Choose only one option for the type of animation\n");
+		  break;
+		default:	
+			printf("default printf \n");
+		  break;
+	}
+}
 
-  width_background= MagickGetImageWidth(background);
-  printf("width--> %d \n",width_background);
-
-  height_image=MagickGetImageHeight(image);
-  printf("height--> %d \n",height_image);
-
-  width_image= MagickGetImageWidth(image);
-  printf("width--> %d \n",width_image);
-
-
-
-  status = MagickAddImage(clone, background);
-  if (status == MagickFalse)
-      ThrowWandException(clone); 
-
-  i = 0;
-      while (i  < 50 ){
-          //printf(" %d \n",i);
-          MagickCompositeLayers(clone, background, OverCompositeOp, 0 , 0);
-
-            switch(type){ 
-              case CIRCLE:
-            		    x = (width_background/2) - (width_image/2)+( (width_image)*cos((float)i/4)); 
-                    y = (height_background/2) - (height_image/2) - ((height_image)*sin((float)i/4));  
-                    printf(" h %d  w %d \n",x,y); 
-
-            break;
-            	break;
-            	case LINEAR:
-                    x = ((width_image/2)*i ); 
-                    y = (height_background/2);  
-                    printf(" h %d  w %d \n",x,y); 
-
-            	break;
-              case SIN:
-                    x = ((width_image/2)*i); 
-                    y = (height_background/2) - (height_image/2) - ((height_image/2)*sin((float)i/2));  
-                    printf(" h %d  w %d \n",x,y); 
+	
+void check_command_line(int num_arg, char *arg_value[], data_input* d)
+{
+	while ((d->option = getopt(num_arg, arg_value,"clszdb:i:o:")) != -1) {
+    switch (d->option) {
+          case 'l' : 
+              if(d->type_animation==0) d->type_animation = LINEAR;
+              else d->type_animation = -1;
+       		    break;
+          case 'c' : 
+              if(d->type_animation==0) d->type_animation = CIRCLE;
+            	else d->type_animation = -1;
               break;
-              case COS:
-                    x = (width_background/2) - (width_image/2)+( (width_image/2)*cos((float)i/2)); 
-                    y = ((height_image/2)*i);  
-                    printf(" h %d  w %d \n",x,y); 
+          case 's' : 
+              if(d->type_animation==0) d->type_animation = SIN;
+            	else d->type_animation = -1;
               break;
-            	case DIAGONAL:
-                    x = ( (width_image/2)*i);   // modificarli 
-                    y = height_background - (height_image/2) - ((width_image/4)*i);  // modificarli 
-                    printf(" h %d  w %d \n",x,y); 
-            	break;
-            	default:
-                    
-                    printf(" null \n"); 
-            	break;
-            	}
+          case 'z' : 
+              if(d->type_animation==0) d->type_animation = COS;
+            	else d->type_animation = -1;
+              break; 
+          case 'd' : 
+              if(d->type_animation==0) d->type_animation = DIAGONAL;
+            	else d->type_animation = -1;   
+            	break;	   	
+          case 'b' : 
+              d->background_file = optarg; 
+              break;
+          case 'i' : 
+              d->input_file = optarg;
+              break;
+	     	  case 'o' : 
+              d->output_file = optarg;
+		 		      break;
+          default: 
+              break;
+        }
+    }
+    //the user must select one and only one type of animation
+    if (d->type_animation==0)  {
+        print_error( ERROR_PARAMETERS );
+        exit(EXIT_FAILURE);
+    }
 
-          if(x > (width_background + width_image) ) 
-           break;
-           //if(x < (-width_image))
-          //  break;
-          if(y > (height_background + height_image) )
-           break;
-           //if(y < (-height_image))
-            //break;
-          if(i > 24 && type == CIRCLE ) // 6 un giro --> 12 2 giri
-                      break;
+    if (d->type_animation==-1)  {
+        print_error( ERROR_MULTIPLE_PARAMETERS );
+        exit(EXIT_FAILURE);
+    }
 
+    if(d->background_file==NULL){
+		    print_error( ERROR_BACKGROUND_FILE );
+		    exit(EXIT_FAILURE);
+	}
 
-      MagickCompositeLayers(clone, image, OverCompositeOp, x , y);
-     status=MagickAddImage(result,  clone);
-      if (status == MagickFalse)
-          ThrowWandException(clone);            
-      MagickSetImageDelay(result, delay);               
-           i++;
-
-        
-    } 
-
-  MagickWriteImages(result,name_output,MagickTrue); 
-
-  result=DestroyMagickWand(result);
-  clone=DestroyMagickWand(clone);
+    if(d->input_file==NULL){
+		    print_error( ERROR_INPUT_FILE );
+		    exit(EXIT_FAILURE);
+	}
+		
+    if(d->output_file==NULL){
+		    print_error( ERROR_OUTPUT_FILE );
+		    exit(EXIT_FAILURE);
+	} 
+	
+	printf("\n\nStart Make ...\n" );
+	
+	
 }
 
 
+int main(int num_arg, char *arg_value[]) {
+  data_input d;
+	datainput_init(&d);
+
+  MagickWand* image;
+  MagickWand* background ;
+
+  MagickWandGenesis();
+	
+	check_command_line(num_arg,arg_value,&d);
+
+	read_image(&image, d.input_file,&background,d.background_file);
+ 	printf("... Read Images ...\n");	
+
+  
+  resize_image(image, background);
+  printf("... Resize Images ...\n");	
+
+  make_gif(background, image, d.output_file, d.type_animation);
+  printf("... Gif is Ready! \n\n");	
+
+  image=DestroyMagickWand(image);
+  background=DestroyMagickWand(background);
+
+  MagickWandTerminus();
+	
+  return 0;
+}
