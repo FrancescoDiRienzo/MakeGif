@@ -30,5 +30,5 @@ make install
 ###Execution:
 
 ```
-./makeGif [-b name_image_background] [-i name_image_foreground] [-o name_image_output] [-a  animation_type]
+./makeGif [-b name_image_background] [-i name_image_foreground] [-o name_image_output] [-animation_type]
 ```
