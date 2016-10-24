@@ -5,10 +5,11 @@
 #include "constant.h"
 #include "libgif.h"
 
-// function for print error with image
+
 void print_error_image(MagickWand * image)
 { 
   char *description; 
+ 
   ExceptionType severity; 
 
   description=MagickGetException(image ,&severity); 
@@ -36,8 +37,8 @@ void read_image(MagickWand** image ,char* name_image, MagickWand** background,ch
 
 // resize the foreground image 
 void resize_image(MagickWand* image, MagickWand* background){  
-   float x;
-   float y;
+   double x ;
+   double y ;
    size_t height_background, width_background , height_image, width_image;
    
    height_image=MagickGetImageHeight(image);
@@ -46,31 +47,33 @@ void resize_image(MagickWand* image, MagickWand* background){
    height_background=MagickGetImageHeight(background);
    width_background= MagickGetImageWidth(background);
    
-   // create the index of resize 
-
+   // calculateù+ùindex of resize 
    if(width_image < width_background || height_image < height_background){            
+
       x = width_background / width_image;
       y = height_background / height_image;
+
    }
    else{
+
       x = width_image / width_background;
       y = height_image /height_background;
-   }
 
+   }
    MagickResetIterator(image);                          //the iteration need in case more than one image must be resize (like file .gif)
   
    if(width_image > height_image){                      // horizontal image
-   	while (MagickNextImage(image) != MagickFalse) 
+   while (MagickNextImage(image) != MagickFalse) 
            MagickResizeImage(image,width_image/(SIZE_FACTOR*x),height_image/(SIZE_FACTOR*x),LanczosFilter);
   }
    else if(width_image < height_image) {                // vertical image
       
-  	 while (MagickNextImage(image) != MagickFalse) 
+   while (MagickNextImage(image) != MagickFalse) 
            MagickResizeImage(image,height_image/(SIZE_FACTOR*y),width_image/(SIZE_FACTOR*y),LanczosFilter);
    }
    else {                                               //square image      
-   	while (MagickNextImage(image) != MagickFalse) 
-           MagickResizeImage(image,height_image/SIZE_FACTOR,width_image/SIZE_FACTOR,LanczosFilter);
+   while (MagickNextImage(image) != MagickFalse) 
+           MagickResizeImage(image,height_image/(SIZE_FACTOR*x),width_image/(SIZE_FACTOR*x),LanczosFilter);
    }
    
 
@@ -93,59 +96,71 @@ void  make_gif(MagickWand* background, MagickWand* image,char* name_output, int 
    height_image=MagickGetImageHeight(image);
    width_image= MagickGetImageWidth(image);
 
-   status = MagickAddImage(clone, background);  		 // copy the backgroud 
+   status = MagickAddImage(clone, background);   // copy the backgroud 
    if (status == MagickFalse)
       print_error_image(clone); 
 
    while (i  < LOOPS ){
-
+      
       switch(type){ 
-            //the image do a circular trajectory around center point of  background
+            //the image do a circular trajectory around center point of background
             case CIRCLE:
-               // choose the shortest one between width_background and height_background for radius of the circle
-              	 if(width_background > height_background){
-               	      x = (width_background/2) - (width_image/2) + ((height_background/4)*cos((float)(2* M_PI/LOOPS*i))); 
-               	      y = (height_background/2) - (height_image/2) - ((height_background/4)*sin((float)(2* M_PI/LOOPS*i)));
-              	 }else{
-                      x = (width_background/2) - (width_image/2)+((width_background/4)*cos((float)(2* M_PI/LOOPS*i))); 
-                      y = (height_background/2) - (height_image/2) - ((width_background/4)*sin((float)(2* M_PI/LOOPS*i)));
-               	 }
-              	 break;
+               // choise a shorter between width_background and height_background
+               if(width_background > height_background){
+                  x = (width_background/2) - (width_image/2) + ((height_background/4)*cos((double)(2* M_PI/LOOPS*i))); 
+                  y = (height_background/2) - (height_image/2) - ((height_background/4)*sin((double)(2* M_PI/LOOPS*i)));
+               }
+               else{
+                  x = (width_background/2) - (width_image/2)+((width_background/4)*cos((double)(2* M_PI/LOOPS*i))); 
+                  y = (height_background/2) - (height_image/2) - ((width_background/4)*sin((double)(2* M_PI/LOOPS*i)));
+               }
+               break;
             //the image do a linear trajectory from left to right at the middle of height of background   
             case LINEAR:
-              	 x =  - (width_image/2) + ((width_background/LOOPS)*i ); 
-              	 y = (height_background/2) - (height_image/2);  
-              	 break;
+
+               x = ((width_background/LOOPS)*i ); 
+               y = (height_background/2) - (height_image/2);  
+
+               break;
             //the image do a sinusoidal trajectory from left to right at the middle of height of background  
             case SIN:
-              	 x = - (width_image/2) + ((width_background/LOOPS)*i ); 
-               	 y = (height_background/2) - (height_image/2) - ((height_background/6)*sin((float)2* M_PI/LOOPS*i));  
-               	 break;
+               
+               x = ((width_background/LOOPS)*i ); 
+               y = (height_background/2) - (height_image/2) - ((height_background/6)*sin((float)2* M_PI/LOOPS*i));  
+             
+               break;
             //the image do a cosinusoidal trajectory from left to right at the middle of height of background 
             case COS:
-                x = (width_background/2) - (width_image/2)+( (width_background/6)*cos((float)2* M_PI/LOOPS*i)); 
-                y = - (width_image/2) + ((height_background/LOOPS)*i);  
-                break;
+               
+               x = (width_background/2) - (width_image/2)+( (width_background/6)*cos((float)2* M_PI/LOOPS*i)); 
+               y = - (width_image/2) + ((height_background/LOOPS)*i);  
+
+               break;
             //the image do a diagonal trajectory from left to right from the top to the bottom of the background
             case DIAGONAL:
-                x = - (width_image/2) +( (width_background/LOOPS)*i); 
-                y = height_background -(width_image/2) - ((height_background/LOOPS)*i); 
-                break;
+
+               x = ( (width_background/LOOPS)*i); 
+               y = height_background -(width_image/2) - ((height_background/LOOPS)*i); 
+
+               break;
             //default --> the image do a linear trajectory from left to right at the middle of height of background  
             default:      
-                x = - (width_image/2) +((width_background/LOOPS)*i ); 
-                y = (height_background/2) - (height_image/2);  
-                break;
+
+               x = ((width_background/LOOPS)*i ); 
+               y = (height_background/2) - (height_image/2);  
+
+               break;
       }
       
       MagickCompositeLayers(clone, image, OverCompositeOp, x , y);
-      status=MagickAddImage(result,  clone);					// add the single image at the gif
-
+      status=MagickAddImage(result,  clone);
+	
       if (status == MagickFalse)
          print_error_image(clone);            
 
-      MagickSetImageDelay(result, DELAY);
-      MagickCompositeLayers(clone, background, OverCompositeOp, 0 , 0); 	// refresh the clone with backgound     
+      MagickSetImageDelay(result, DELAY);  
+     
+      MagickCompositeLayers(clone, background, OverCompositeOp, 0 , 0);      // refresh the information in clone for next iteration          
       i++;
    } 
 
@@ -155,5 +170,3 @@ void  make_gif(MagickWand* background, MagickWand* image,char* name_output, int 
    result=DestroyMagickWand(result);
    clone=DestroyMagickWand(clone);
 }
-
-

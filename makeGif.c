@@ -1,4 +1,3 @@
-
 #include <getopt.h>
 #include <MagickWand/MagickWand.h>
 #include "constant.h"
@@ -12,7 +11,6 @@ typedef struct datainput{
   char* input_file;
   char* output_file;
 } data_input;
-
 //Initialization of the structure
 void datainput_init(data_input* d){
   d->option=0;
@@ -24,67 +22,67 @@ void datainput_init(data_input* d){
 
 // function for the print of error
 void print_error(int type) {
-   printf("\nError:\n");
-   switch (type)
-   {
-	case ERROR_BACKGROUND_FILE :		
-		printf("miss -b option\n");
-		break;
-	case ERROR_INPUT_FILE :		
-		printf("miss -i option\n");
-		break;
-	case ERROR_OUTPUT_FILE :	
-		printf("miss -o option\n");
-		break;
-	case ERROR_PARAMETERS :	
-		printf("Choose the type of animation with the following options:\n");
-		printf("\tlineal:  -l\n\tcircle:  -c\n\tsin:     -s\n\tcos:     -z\n\tdiagonal:-d\n");
-		break;
-	case ERROR_MULTIPLE_PARAMETERS :	
-		printf("Choose only one option for the type of animation\n");
-		break;
-	default:	
-		printf("default printf \n");
-		break;
-  }
+	printf("\nError:\n");
+    switch (type)
+	{
+		case ERROR_BACKGROUND_FILE :		
+			printf("miss -b option\n");
+		  break;
+		case ERROR_INPUT_FILE :		
+			printf("miss -i option\n");
+		  break;
+		case ERROR_OUTPUT_FILE :	
+			printf("miss -o option\n");
+		  break;
+		case ERROR_PARAMETERS :	
+			printf("Choose the type of animation with the following options:\n");
+			printf("\tlineal:  -l\n\tcircle:  -c\n\tsin:     -s\n\tcos:     -z\n\tdiagonal:-d\n");
+		  break;
+		case ERROR_MULTIPLE_PARAMETERS :	
+			printf("Choose only one option for the type of animation\n");
+		  break;
+		default:	
+			printf("default printf \n");
+		  break;
+	}
 }
 
 	
 void check_command_line(int num_arg, char *arg_value[], data_input* d)
 {
-while ((d->option = getopt(num_arg, arg_value,"clszdb:i:o:")) != -1) {
+	while ((d->option = getopt(num_arg, arg_value,"clszdb:i:o:")) != -1) {
     switch (d->option) {
-        case 'l' : 
-              	if(d->type_animation==0) d->type_animation = LINEAR;
-             	else d->type_animation = -1;
-       		break;
+          case 'l' : 
+              if(d->type_animation==0) d->type_animation = LINEAR;
+              else d->type_animation = -1;
+       		    break;
           case 'c' : 
-              	if(d->type_animation==0) d->type_animation = CIRCLE;
+              if(d->type_animation==0) d->type_animation = CIRCLE;
             	else d->type_animation = -1;
-              	break;
+              break;
           case 's' : 
-             	if(d->type_animation==0) d->type_animation = SIN;
+              if(d->type_animation==0) d->type_animation = SIN;
             	else d->type_animation = -1;
-              	break;
+              break;
           case 'z' : 
-             	if(d->type_animation==0) d->type_animation = COS;
+              if(d->type_animation==0) d->type_animation = COS;
             	else d->type_animation = -1;
-             	break; 
+              break; 
           case 'd' : 
-              	if(d->type_animation==0) d->type_animation = DIAGONAL;
+              if(d->type_animation==0) d->type_animation = DIAGONAL;
             	else d->type_animation = -1;   
             	break;	   	
           case 'b' : 
-              	d->background_file = optarg; 
-              	break;
+              d->background_file = optarg; 
+              break;
           case 'i' : 
-              	d->input_file = optarg;
-             	break;
+              d->input_file = optarg;
+              break;
 	  case 'o' : 
-             	d->output_file = optarg;
-		break;
+              d->output_file = optarg;
+	      break;
           default: 
-             	break;
+              break;
         }
     }
     //the user must select one and only one type of animation
@@ -113,8 +111,9 @@ while ((d->option = getopt(num_arg, arg_value,"clszdb:i:o:")) != -1) {
 		    exit(EXIT_FAILURE);
 	} 
 	
-  printf("\n\nStart Make ...\n" );
-		
+	printf("\n\nStart Make ...\n" );
+	
+	
 }
 
 
@@ -131,7 +130,7 @@ int main(int num_arg, char *arg_value[]) {
 
   read_image(&image, d.input_file,&background,d.background_file);
   printf("... Read Images ...\n");	
-  
+
   resize_image(image, background);
   printf("... Resize Images ...\n");	
 

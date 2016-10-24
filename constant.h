@@ -16,6 +16,6 @@
 //	
 
 //parameters to make the gif
-#define LOOPS 		  50
-#define DELAY 		  15
-#define SIZE_FACTOR       5
+#define LOOPS  		50
+#define DELAY 		15
+#define SIZE_FACTOR	5
